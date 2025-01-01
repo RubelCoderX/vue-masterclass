@@ -2,13 +2,11 @@
 import { supabase } from './lib/superbaseClient'
 
 const errorStore = useErrorStore()
-const authStore = useAuthStore()
 
 onErrorCaptured((error) => errorStore.setError({ error, customCode: 500 }))
 
 onMounted(async () => {
-  const { data } = await supabase.auth.getSession()
-  if (data.session?.user) await authStore.setAuth(data.session)
+  useAuthStore().trackAuthChanges()
 })
 </script>
 <template>

@@ -1,15 +1,29 @@
 <script setup lang="ts">
+import { useFormErrors } from '@/composables/formErrors'
 import { login } from '@/utils/supaAuth'
+import { watchDebounced } from '@vueuse/core'
 
 const formData = ref({
   email: '',
   password: '',
 })
+const { serverError, handleServerError, realtimeError, handleLoginForm } = useFormErrors()
 
 const router = useRouter()
+watchDebounced(
+  formData,
+  () => {
+    handleLoginForm(formData.value)
+  },
+  {
+    debounce: 1000,
+    deep: true,
+  },
+)
 const signin = async () => {
-  const isLoggedIn = await login(formData.value)
-  if (isLoggedIn) router.push('/')
+  const { error } = await login(formData.value)
+  if (!error) return router.push('/')
+  handleServerError(error)
 }
 </script>
 
@@ -31,10 +45,16 @@ const signin = async () => {
             <Label id="email" class="text-left">Email</Label>
             <Input
               type="email"
-              placeholder="johndoe19@example.com"
+              placeholder="Enter your email"
               v-model="formData.email"
               required
+              :class="{ 'border-red-500': serverError }"
             />
+            <ul class="text-sm text-left text-red-500" v-if="realtimeError?.email.length">
+              <li v-for="error in realtimeError.email" :key="error" class="list-disc">
+                {{ error }}
+              </li>
+            </ul>
           </div>
           <div class="grid gap-2">
             <div class="flex items-center">
@@ -44,11 +64,23 @@ const signin = async () => {
             <Input
               id="password"
               type="password"
+              placeholder="Enter your password"
               autocomplete
               v-model="formData.password"
               required
+              :class="{ 'border-red-500': serverError }"
             />
+            <ul class="text-sm text-left text-red-500" v-if="realtimeError?.password.length">
+              <li v-for="error in realtimeError.password" :key="error" class="list-disc">
+                {{ error }}
+              </li>
+            </ul>
           </div>
+          <ul class="text-sm text-left text-red-500" v-if="serverError">
+            <li class="list-disc">
+              {{ serverError }}
+            </li>
+          </ul>
           <Button type="submit" class="w-full"> Login </Button>
         </form>
         <div class="mt-4 text-sm text-center">

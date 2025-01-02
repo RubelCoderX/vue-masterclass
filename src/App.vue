@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { supabase } from './lib/superbaseClient'
-
 const errorStore = useErrorStore()
 
 onErrorCaptured((error) => errorStore.setError({ error, customCode: 500 }))

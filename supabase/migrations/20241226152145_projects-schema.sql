@@ -1,15 +1,14 @@
-drop table if exists projects;
-
-drop type if exists current_status;
-create type current_status as enum ('in-progress', 'completed');
+drop table if exists profiles;
+TRUNCATE auth.users cascade;
 
 create table 
-  projects (
-    id bigint primary key generated always as identity not null,
+  profiles (
+    id uuid references auth.users on delete cascade not null,
     created_at timestamptz default now() not null,
-    name text not null,
-    slug text unique not null,
-    description text,
-    status current_status default 'in-progress' not null,
-    collaborators text array default array[]::varchar[] not null
+    username text unique not null,
+    full_name text not null,
+    bio text default null,
+    mode text default 'dark' not null,
+    avatar_url text default null,
+    primary key (id)
   );

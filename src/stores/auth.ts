@@ -10,21 +10,22 @@ export const useAuthStore = defineStore('auth-store',() =>{
     const profile = ref<null | Tables<'profiles'>>(null)
     const isTrackingAuthChanges = ref(false)
 
-    const setProfile = async() =>{
-        if(!user.value){
-            profile.value = null
-            return
-        }
-
-        if(!profile.value || profile.value.id !== user.value.id){
-            //fetch the profile
-            const {data} = await profileQuery(user.value.id)
-            profile.value = data || null
-
-
-        }
-
+    
+  const setProfile = async () => {
+    if (!user.value) {
+      profile.value = null
+      return
     }
+
+    if (!profile.value || profile.value.id !== user.value.id) {
+      const { data } = await profileQuery({
+        column: 'id',
+        value: user.value.id
+      })
+
+      profile.value = data || null
+    }
+  }
     const setAuth = async(userSession:null | Session = null) =>{
         if(!userSession){
             user.value = null
